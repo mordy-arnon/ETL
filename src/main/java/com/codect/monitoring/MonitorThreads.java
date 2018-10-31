@@ -8,7 +8,7 @@ import java.util.Map;
 import com.codect.common.MLog;
 
 public abstract class MonitorThreads {
-	protected static enum FIELDS {status, exception, startTime, endTime, duration,records};
+	protected static enum FIELDS {STATUS, EXCEP, START_TIME, END_TIME, DURATION,RECORDS};
 	protected static enum STATUS {STARTING, WRITING, FINISHED, STOP,CANCELLED};
 	private long startTime;
 	private int writtenRows=0;
@@ -59,7 +59,7 @@ public abstract class MonitorThreads {
 			return false;
 		startTime = System.currentTimeMillis();
 		Map<String, Object> line = new HashMap<String, Object>();
-		line.put(FIELDS.STATUS.name(), STATUS.INIT.name());
+		line.put(FIELDS.STATUS.name(), STATUS.STARTING.name());
 		line.put(FIELDS.START_TIME.name(), new Date());
 		update(taskName, line);
 		MLog.info(this, "task %s: start running", taskName);
@@ -80,7 +80,7 @@ public abstract class MonitorThreads {
 	        if (!canContinue())
 			return false;
 		Map<String, Object> line = new HashMap<String, Object>();
-		line.put(FIELDS.STATUS.name(), STATUS.CLOSED.name());
+		line.put(FIELDS.STATUS.name(), STATUS.FINISHED.name());
 		update(taskName, line);
 		MLog.info(this, "task %s: start closing", taskName);
 		return true;
