@@ -5,7 +5,7 @@ it is easy to run it (instractions: howToRun.md), as a local service, and config
 
 for example:
 this configuration:
-<code>
+```
 {
   "_id":"moveCustomerDataFromSqlToMongo",
   "description":"free text. the system does not read fields it does not know.",
@@ -32,7 +32,7 @@ this configuration:
     "indices" : [["eventType","localEventNum"],["lastModified"]]
   }
 }
-<code>
+```
 this way we define a task that run in the schedule cron timing, with 4 threads (default in async), that read data from MySql with the above parameters, concatenate the field: "customerId" to _id and write it to mongoDB in upsert way.
 it also create indices from given fields on the new collection.
 
