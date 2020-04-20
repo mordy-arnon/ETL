@@ -9,7 +9,6 @@ import org.bson.Document;
 import com.codect.common.Fields;
 import com.codect.common.MLog;
 import com.codect.connections.MongoConnection;
-//import com.fnx.snapshot.dao.MongoConnection;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.bulk.BulkWriteResult;
@@ -20,7 +19,9 @@ import com.mongodb.client.model.WriteModel;
 public class UpsertMongoWriter extends InsertMongoWriter {
 	private List<String> keys;
 	private Map<String, Object> fixJoin;
-
+	private List<Map<String, String>> addToSet;
+	private List<Map<String, String>> setKeys;
+	
 	@Override
 	public void close() {		
 		List<WriteModel<Document>> bulk = new ArrayList<WriteModel<Document>>();
@@ -40,19 +41,26 @@ public class UpsertMongoWriter extends InsertMongoWriter {
 	@Override
 	public void write(List<Map<String, Object>> list) {
 		List<WriteModel<Document>> bulk = new ArrayList<WriteModel<Document>>();
-		List<String> addToSet = (List<String>) target.get(Fields.addToSet);
 
 		for (Map<String, Object> dbObject : list) {
 			BasicDBObject update = new BasicDBObject();
 			DBObject fieldsToUpdate = new BasicDBObject();
 			if (addToSet != null) {
-				for (String item : addToSet) {
-					Object obj = dbObject.get(item);
-					fieldsToUpdate.put(item, obj);
+				for (Map<String, String> item : addToSet) {
+					Object obj = DBObjectUtil.getInnerField(item.get("what"),dbObject);
+					String where=fixHashtags(item.get("where"),dbObject);
+					fieldsToUpdate.put(where, obj);
 				}
 				update.put("$addToSet", fieldsToUpdate);
-			} else
-				update = new BasicDBObject("$set", dbObject);
+			}
+			if (setKeys != null){
+				for (Map<String, String> item : setKeys) {
+					Object obj = DBObjectUtil.getInnerField(item.get("what"),dbObject);
+					String where=fixHashtags(item.get("where"),dbObject);
+					fieldsToUpdate.put(where, obj);
+				}
+				update.put("$set", dbObject);
+			}
 
 			BasicDBObject updateWhere = new BasicDBObject();
 			for (String key : keys) {
@@ -74,5 +82,20 @@ public class UpsertMongoWriter extends InsertMongoWriter {
 		super.init();
 		keys = (List<String>) target.get(Fields.keys);
 		fixJoin = (Map<String, Object>) target.get(Fields.fixJoin);
+		addToSet = (List<Map<String, String>>) target.get(Fields.addToSet);
+		setKeys = (List<Map<String, String>>) target.get("set");	
+	}
+	
+	private String fixHashtags(String input,Map<String, Object> data){
+		while (input.contains("#")){
+			int startChar=input.indexof("#");
+			String firstPart=input.substring(0,startChar);
+			int endChar=input.indexof("#",startChar+1);
+			String key=input.substring(startChar+1,endChar);
+			String lastPart=input.substring(endChar+1);
+			String value=DBObjectUtil.getInnerField(key,data);
+			input=firstPart+value+lastPart;
+		}
+		return input;
 	}
 }
