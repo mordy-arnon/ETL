@@ -5,18 +5,12 @@ import java.util.Map;
 
 /*
  * add json column which contain one or more column data.
- * for example:
- * _id:{
- * 		"name":"a",
- * 		"id":"111"
- * 	}
- * 
- * config:
+ * config for example:
  * {
- "class" : "StringFromFieldsTrans",
- "fields" : ["name","id"],
- "to":"_id"
- }
+ *     "class" : "StringFromFieldsTrans",
+ *     "fields" : ["name","|","id"],
+ *     "to":"_id"
+ * }
  */
 public class StringFromFieldsTrans extends SingleLineTrans {
 
@@ -26,9 +20,12 @@ public class StringFromFieldsTrans extends SingleLineTrans {
 		List<String> fields = (List<String>) conf.get("fields");
 		String id = "";
 		for (String col : fields) {
-			id+=line.get(col)+"|";
+			object data=DBObjectUtil.getInnerField(col,line);
+			if (data!=null)
+				id+=data;
+			else 
+				id+=col;
 		}
-		id=id.substring(0,id.length()-1);
 		line.put((String) conf.get("to"), id);
 		return line;
 	}
