@@ -1,4 +1,4 @@
-package com.codect.triggers;
+package com.codect.swagger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
