@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class ConcatTrans extends SingleLineTrans {
 	@Override
-	public Map<String, Object> transLine(Map<String, Object> line) {
+	public Map<String, Object> transLine(Map<String, Object> record) {
 		for(Map<String,Object> concConf:((List<Map<String,Object>>)conf.get("list")){
 			List<String> fields = (List<String>) concConf.get("fields");
 			String newVal = "";
@@ -30,7 +30,7 @@ public class ConcatTrans extends SingleLineTrans {
 				else 
 					newVal+=col;
 			}
-			DBObjectUtil.recursivePut((String) concConf.get("to"),line,newVal);
+			DBObjectUtil.recursivePut(record,(String) concConf.get("to"),newVal);
 		}
 		return line;
 	}
