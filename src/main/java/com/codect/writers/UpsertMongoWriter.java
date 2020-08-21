@@ -23,22 +23,6 @@ public class UpsertMongoWriter extends InsertMongoWriter {
 	private List<Map<String, String>> setKeys;
 	
 	@Override
-	public void close() {		
-		List<WriteModel<Document>> bulk = new ArrayList<WriteModel<Document>>();
-		if (fixJoin != null) {
-			for (String key : fixJoin.keySet()) {
-				if (key.equals("deleteMany")) {
-					Map<String, Object> value = (Map<String, Object>) fixJoin.get(key);
-					Document filter = new Document(value);
-					bulk.add(new DeleteManyModel<Document>(filter));
-				}
-			}
-			MongoConnection.getInstance().getCollection(tableName).bulkWrite(bulk);
-		}
-		super.close();
-	}
-
-	@Override
 	public void write(List<Map<String, Object>> list) {
 		List<WriteModel<Document>> bulk = new ArrayList<WriteModel<Document>>();
 
@@ -85,7 +69,23 @@ public class UpsertMongoWriter extends InsertMongoWriter {
 		addToSet = (List<Map<String, String>>) target.get(Fields.addToSet);
 		setKeys = (List<Map<String, String>>) target.get("set");	
 	}
-	
+
+	@Override
+	public void close() {		
+		List<WriteModel<Document>> bulk = new ArrayList<WriteModel<Document>>();
+		if (fixJoin != null) {
+			for (String key : fixJoin.keySet()) {
+				if (key.equals("deleteMany")) {
+					Map<String, Object> value = (Map<String, Object>) fixJoin.get(key);
+					Document filter = new Document(value);
+					bulk.add(new DeleteManyModel<Document>(filter));
+				}
+			}
+			MongoConnection.getInstance().getCollection(tableName).bulkWrite(bulk);
+		}
+		super.close();
+	}
+
 	private String fixHashtags(String input,Map<String, Object> data){
 		while (input.contains("#")){
 			int startChar=input.indexof("#");
