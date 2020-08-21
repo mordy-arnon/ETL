@@ -43,9 +43,14 @@ public class UpsertMongoWriter extends InsertMongoWriter {
 					String where=fixHashtags(item.get("where"),dbObject);
 					fieldsToUpdate.put(where, obj);
 				}
-				update.put("$set", dbObject);
+				update.put("$set", fieldsToUpdate);
 			}
-
+			if (target.get("setUnder")!=null){
+				keys.stream.foreach(k->dbObject.remove(k));
+				String setUnder=dbObject.remove(target.get("setUnder"));
+				update.put("$set", new BasicDBObject(setUnder,dbObject));
+			}
+			
 			BasicDBObject updateWhere = new BasicDBObject();
 			for (String key : keys) {
 				updateWhere.put(key, dbObject.get(key));
