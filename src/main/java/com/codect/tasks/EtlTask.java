@@ -17,6 +17,7 @@ import com.codect.writers.Writer;
 public class EtlTask implements Runnable {
 	private String taskName;
 	private Map<String, Object> params;
+	private List<Transformer> allTrans=new ArrayList<>();
 
 	public EtlTask(String taskName, Map<String, Object> calculateParameters) {
 		this.taskName = taskName;
@@ -50,23 +51,28 @@ public class EtlTask implements Runnable {
 				if (conf.get("async") != null) {
 					pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(((Number)conf.get("async")).intValue());
 				}
+				if (transforms != null)
+				for (Object transform : transforms) {
+					Map<String, Object> transConf = (Map<String, Object>) transform;
+					Transformer trans = Transformer.create(transConf.get("class"));
+					trans.init(transConf, params);
+					allTrans.add(trans);
+				}
 				do {
 					if (!monitorThreads.canContinue())
 						break;
 					List<Map<String, Object>> next = reader.next();
-					if (transforms != null)
-						for (Object transform : transforms) {
-							Map<String, Object> transConf = (Map<String, Object>) transform;
-							Transformer trans = Transformer.create(transConf.get("class"));
-							trans.init(transConf, params);
-							next = trans.transform(next);
-						}
+					for (Transformer trans : allTrans) {
+						next = trans.transform(next);
+					}
 					if (isFirstBulk) {
 						isFirstBulk = !isFirstBulk;
 						writer.prepareTarget(next.get(0));
 					}
-					monitorThreads.setWrittenRows(next.size());
-					write(next, pool, writer);
+					if(next.size()>0){
+						monitorThreads.setWrittenRows(next.size());
+						write(next, pool, writer);
+					}
 				} while (reader.hasNext());
 			}
 			try {
