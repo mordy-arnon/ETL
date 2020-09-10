@@ -13,7 +13,7 @@ import com.mongodb.client.FindIterable;
  * use values - if document catch too much memory.
  * call clearAndReload to refresh cache.
  *
- * @author Mordy. source - Lael + small changes.
+ * @author Mordy. source from Lael + small changes.
  */
 public class OdsCache {
     private ApplicationContext ac;
