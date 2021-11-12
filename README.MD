@@ -16,17 +16,11 @@
        "fields" : ["customerId"]
      }
   ],
-    "driverClass" : "com.sqlserver.jdbc.Driver", 
-    "connectionUrl" : "jdbc:sqlserver://innerServerBank:3306/LIVE", 
-    "query" : "select +params.fieldName+ from accounts where MCH=+params.MCH+"
-  },
   "target" : {
     "class" : "ReplaceOneMongoWriter", 
     "writeToCollection" : "customer", 
     "upsert" : "insert if not exist", 
-    "keys" : ["eventType","localEventNum"], 
-    "indices" : [["eventType","localEventNum"],["lastModified"]]
-    "class" : "ApiWriter"
+    "keys" : ["_id"]
   }
 }
 ```
