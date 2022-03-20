@@ -20,7 +20,7 @@ import java.util.Map;
 public class ConcatTrans extends SingleLineTrans {
 	@Override
 	public Map<String, Object> transLine(Map<String, Object> record) {
-		for(Map<String,Object> concConf:((List<Map<String,Object>>)conf.get("list")){
+		for(Map<String,Object> concConf:((List<Map<String,Object>>)conf.get("list"))){
 			List<String> fields = (List<String>) concConf.get("fields");
 			String newVal = "";
 			for (String col : fields) {
